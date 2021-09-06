@@ -643,32 +643,65 @@ public enum KA_MonospacedFont {
     case menloItalic(CGFloat)
     case menlo(CGFloat)
     
+    // Unsafe cases, will work only with digits
+    case unsafeCustom(name: String, size: CGFloat)
+    case unsafeDirect(font: UIFont)
+    
     func font() -> UIFont {
         switch self {
-        case .courier(let size) :
-            return UIFont(name: "Courier", size: size)!
-        case .courierBold(let size) :
-            return UIFont(name: "Courier-Bold", size: size)!
-        case .courierBoldOblique(let size) :
-            return UIFont(name: "Courier-BoldOblique", size: size)!
-        case .courierOblique(let size) :
-            return UIFont(name: "Courier-Oblique", size: size)!
-        case .courierNewBoldItalic(let size) :
-            return UIFont(name: "CourierNewPS-BoldItalicMT", size: size)!
-        case .courierNewBold(let size) :
-            return UIFont(name: "CourierNewPS-BoldMT", size: size)!
-        case .courierNewItalic(let size) :
-            return UIFont(name: "CourierNewPS-ItalicMT", size: size)!
-        case .courierNew(let size) :
-            return UIFont(name: "CourierNewPSMT", size: size)!
-        case .menloBold(let size) :
-            return UIFont(name: "Menlo-Bold", size: size)!
-        case .menloBoldItalic(let size) :
-            return UIFont(name: "Menlo-BoldItalic", size: size)!
-        case .menloItalic(let size) :
-            return UIFont(name: "Menlo-Italic", size: size)!
-        case .menlo(let size) :
-            return UIFont(name: "Menlo-Regular", size: size)!
+            case .courier(let size) :
+                return UIFont(name: "Courier", size: size)!
+            case .courierBold(let size) :
+                return UIFont(name: "Courier-Bold", size: size)!
+            case .courierBoldOblique(let size) :
+                return UIFont(name: "Courier-BoldOblique", size: size)!
+            case .courierOblique(let size) :
+                return UIFont(name: "Courier-Oblique", size: size)!
+            case .courierNewBoldItalic(let size) :
+                return UIFont(name: "CourierNewPS-BoldItalicMT", size: size)!
+            case .courierNewBold(let size) :
+                return UIFont(name: "CourierNewPS-BoldMT", size: size)!
+            case .courierNewItalic(let size) :
+                return UIFont(name: "CourierNewPS-ItalicMT", size: size)!
+            case .courierNew(let size) :
+                return UIFont(name: "CourierNewPSMT", size: size)!
+            case .menloBold(let size) :
+                return UIFont(name: "Menlo-Bold", size: size)!
+            case .menloBoldItalic(let size) :
+                return UIFont(name: "Menlo-BoldItalic", size: size)!
+            case .menloItalic(let size) :
+                return UIFont(name: "Menlo-Italic", size: size)!
+            case .menlo(let size) :
+                return UIFont(name: "Menlo-Regular", size: size)!
+            case .unsafeCustom(name: let name, size: let size):
+                return UIFont(name: name, size: size)!.monospacedDigitFont
+            case .unsafeDirect(font: let font):
+                return font.monospacedDigitFont
         }
     }
+}
+
+extension UIFont {
+    var monospacedDigitFont: UIFont {
+        let oldFontDescriptor = fontDescriptor
+        let newFontDescriptor = oldFontDescriptor.monospacedDigitFontDescriptor
+        return UIFont(descriptor: newFontDescriptor, size: 0)
+    }
+}
+
+private extension UIFontDescriptor {
+    
+    var monospacedDigitFontDescriptor: UIFontDescriptor {
+        let fontDescriptorFeatureSettings: [[UIFontDescriptor.FeatureKey: Int]] = [
+            // same width for all digits
+            [.featureIdentifier: kNumberSpacingType, .typeIdentifier: kMonospacedNumbersSelector],
+            // same height for all digits
+            [.featureIdentifier: kNumberCaseType, .typeIdentifier: kUpperCaseNumbersSelector]
+        ]
+        
+        let fontDescriptorAttributes = [UIFontDescriptor.AttributeName.featureSettings: fontDescriptorFeatureSettings]
+        let fontDescriptor = self.addingAttributes(fontDescriptorAttributes)
+        return fontDescriptor
+    }
+    
 }
